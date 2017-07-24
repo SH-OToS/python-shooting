@@ -17,6 +17,7 @@ def main():
   score = 0
   enemys = []
   bulleds = []
+  first = True
 
   # player
   (p_w,p_h) = (20,50)
@@ -24,7 +25,7 @@ def main():
   tmp = pygame.transform.scale(tmp, (p_w,p_h))
   rect_player = tmp.get_rect()
   rect_player.center = (w/2, h/2)
-  player = {"img":tmp, "rect": rect_player, "width": p_w, "height": p_h, "HP":3}
+  player = {"img":tmp, "rect": rect_player, "width": p_w, "height": p_h, "HP":0}
 
   # bullet
   (b_w,b_h) = (10,10)
@@ -32,8 +33,9 @@ def main():
   bullet_img = pygame.transform.scale(bullet_img, (b_w, b_h))
 
   # enemy
+  e_s_p = 10
   (e_w,e_h) = (50,50)
-  enemy_img = pygame.image.load("./enemy.png").convert_alpha()
+  enemy_img = pygame.image.load("./bullet.png").convert_alpha()
   enemy_img = pygame.transform.scale(enemy_img, (e_w, e_h))
     
   while (1):
@@ -54,12 +56,23 @@ def main():
         if event.key == 32 and len(bulleds) < BULLED_MAX_LENGTH:
           bulleds.append(bullet_img.get_rect())
           bulleds[len(bulleds) - 1].center = (player["rect"].x + (player["width"] / 2), player["rect"].y + 10)
+        if event.key == 115 and player["HP"] < 1:
+          enemys = []
+          bulleds = []
+          score = 0
+          player["HP"] = 3
 
     if(player["HP"] < 1):
-      Text = myfont.render("GameOver", False, (255, 255, 255))
-      screen.blit(Text,(0, 0))
+      if(first == False):
+        Text1 = myfont.render("GameOver Score: " + str(score), False, (255, 255, 255))
+        screen.blit(Text1,(0, 30))
+      Text2 = myfont.render("start: S", False, (255, 255, 255))
+      Text3 = myfont.render("finish: esc", False, (255, 255, 255))
+      screen.blit(Text2,(0, 100))
+      screen.blit(Text3,(0, 150))
       continue
 
+    first = False
     pressed_key = pygame.key.get_pressed()
     rect = player["rect"]
     if pressed_key[K_LEFT] and rect.x > 0:
