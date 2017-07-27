@@ -17,6 +17,7 @@ def main():
   score = 0
   enemys = []
   bulleds = []
+  effect = []
   first = True
 
   # player
@@ -33,10 +34,15 @@ def main():
   bullet_img = pygame.transform.scale(bullet_img, (b_w, b_h))
 
   # enemy
-  e_s_p = 10
   (e_w,e_h) = (50,50)
   enemy_img = pygame.image.load("./bullet.png").convert_alpha()
   enemy_img = pygame.transform.scale(enemy_img, (e_w, e_h))
+
+  # Hit effect
+  (h_w, h_h) = (50, 50)
+  hit_img = pygame.image.load("./explosion.png").convert_alpha()
+  hit_img = pygame.transform.scale(hit_img, (h_w, h_h))
+
     
   while (1):
     pygame.display.update()             # 画面更新
@@ -59,12 +65,15 @@ def main():
         if event.key == 115 and player["HP"] < 1:
           enemys = []
           bulleds = []
+          effect = []
+          player["rect"].x = w / 2 - player["width"] / 2
+          player["rect"].y = h / 2 - player["height"] / 2
           score = 0
           player["HP"] = 3
 
     if(player["HP"] < 1):
       if(first == False):
-        Text1 = myfont.render("GameOver Score: " + str(score), False, (255, 255, 255))
+        Text1 = myfont.render("GameOver         Score: " + str(score), False, (255, 255, 255))
         screen.blit(Text1,(0, 30))
       Text2 = myfont.render("start: S", False, (255, 255, 255))
       Text3 = myfont.render("finish: esc", False, (255, 255, 255))
@@ -98,9 +107,20 @@ def main():
     # enemyの行動パターン
     enemy_pattern = [[0,4],[1,3],[-1,3],[-2,2],[1,3],[1,6],[-1,6],[1,1],[0,1],[0,5]]
 
-    screen.blit(player["img"], player["rect"])    # プレイヤー画像の描画
+    # 爆発の描画
+    for i in range(len(effect)):
+      size = fps - effect[i][1]
+      if(size > 100):
+        effect[i][0].move_ip(1, 1)
+      screen.blit(pygame.transform.scale(hit_img, (size, size)), effect[i][0])
+      if(effect[i][0].x > w):
+        effect.pop(i)
+        break
+    
+    # プレイヤー画像の描画
+    screen.blit(player["img"], player["rect"])
 
-    # 球の絵画
+    # 球の描画
     for i in range(len(bulleds)):
       bulleds[i].move_ip(0, -4)
       screen.blit(bullet_img, bulleds[i])
@@ -108,7 +128,7 @@ def main():
       if(bulleds[i].y < 1):
         bulleds.pop(i)
         break
-    # enemyの絵画
+    # enemyの描画
     for i in range(len(enemys)):
       enemys[i].move_ip(enemy_pattern[i][0],enemy_pattern[i][1])
       screen.blit(enemy_img, enemys[i])
@@ -117,7 +137,7 @@ def main():
         enemys.pop(i)
         break
 
-    # テキストの絵画
+    # テキストの描画
     scoreText = myfont.render('score: ' + str(score), False, (255, 255, 255)) # スコア "HP: " + str(player["HP"]
     HPBar = ""
     for i in range(player["HP"]):
@@ -129,14 +149,18 @@ def main():
     # 当たり判定
     flag = 0
     for i in range(len(enemys)):
-      if(enemys[i].y + e_h >= player["rect"].y and enemys[i].y <= player["rect"].y + player["width"]):
-          if(enemys[i].x + e_h >= player["rect"].x and enemys[i].x <= player["rect"].x + player["height"]):
+      if(enemys[i].y + e_h >= player["rect"].y and enemys[i].y <= player["rect"].y + player["height"]):
+          if(enemys[i].x + e_w >= player["rect"].x and enemys[i].x <= player["rect"].x + player["width"]):
             player["HP"] -= 1
+            effect.append([hit_img.get_rect(), fps])
+            effect[-1][0].center = (enemys[i].x + e_w / 2, player["rect"].y + e_h / 2)
             enemys.pop(i)
             break
       for l in range(len(bulleds)):
         if(enemys[i].y + e_h >= bulleds[l].y and enemys[i].y <= bulleds[l].y + b_h):
-          if(enemys[i].x + e_h >= bulleds[l].x and enemys[i].x <= bulleds[l].x + b_w):
+          if(enemys[i].x + e_w >= bulleds[l].x and enemys[i].x <= bulleds[l].x + b_w):
+            effect.append([hit_img.get_rect(), fps])
+            effect[-1][0].center = (bulleds[l].x, bulleds[l].y)
             enemys.pop(i)
             bulleds.pop(l)
             flag = 1
