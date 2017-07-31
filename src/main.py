@@ -109,7 +109,7 @@ def main():
 
     # 爆発の描画
     for i in range(len(effect)):
-      size = fps - effect[i][1]
+      size = fps - effect[i][1] + 50
       if(size > 100):
         effect[i][0].move_ip(1, 1)
       screen.blit(pygame.transform.scale(hit_img, (size, size)), effect[i][0])
